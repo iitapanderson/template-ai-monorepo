@@ -1,0 +1,13 @@
+# Copier answers for the mcp-capability overlay — DO NOT EDIT BY HAND.
+# Regenerated on every `copier copy` / `copier update`; edits here are overwritten.
+# This file is the update linkage: `copier update -a .copier-answers.mcp.yml` pulls
+# mcp-capability changes from template-mcp-capability via 3-way merge, independently of the
+# base and python-stack overlays' own answers files.
+_commit: v0.1.0
+_src_path: gh:Astenuprax/template-mcp-capability
+author_name: Phillip Anderson
+author_org: Integrate-IT Australia
+github_owner: Astenuprax
+project_description: Golden-standard AI/agentic monorepo template (uv workspace; pydantic-ai
+    agent + MCP server).
+project_name: template-ai-monorepo

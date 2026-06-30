@@ -1,0 +1,15 @@
+# Copier answers for the governance-base overlay — DO NOT EDIT BY HAND.
+# Regenerated on every `copier copy` / `copier update`; edits here are overwritten.
+# This file is the update linkage: `copier update -a .copier-answers.base.yml` pulls
+# governance changes from template-governance-base via 3-way merge.
+_commit: v0.1.0
+_src_path: gh:Astenuprax/template-governance-base
+author_name: Phillip Anderson
+author_org: Integrate-IT Australia
+contact_email: panderson@integrate-it.com.au
+copyright_year: 2026
+github_owner: Astenuprax
+license_holder: Phillip Anderson | Integrate-IT Australia
+project_description: Golden-standard AI/agentic monorepo template (uv workspace; pydantic-ai
+    agent + MCP server).
+project_name: template-ai-monorepo

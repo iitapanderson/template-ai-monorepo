@@ -1,0 +1,13 @@
+# Copier answers for the python uv-workspace overlay — DO NOT EDIT BY HAND.
+# Regenerated on every `copier copy` / `copier update`; edits here are overwritten.
+# This file is the update linkage: `copier update -a .copier-answers.python.yml` pulls
+# python-stack changes from template-py-uv-workspace via 3-way merge, independently of the
+# base overlay's own `.copier-answers.base.yml`.
+_commit: v0.1.0
+_src_path: gh:Astenuprax/template-py-uv-workspace
+author_name: Phillip Anderson
+author_org: Integrate-IT Australia
+github_owner: Astenuprax
+project_description: Golden-standard AI/agentic monorepo template (uv workspace; pydantic-ai
+    agent + MCP server).
+project_name: template-ai-monorepo
