@@ -2,7 +2,7 @@
 id: ADR-0002
 type: ADR
 status: VERIFIED
-gist: Use the standalone fastmcp library on the agent (client) side and the official mcp SDK's FastMCP on the server side — each role uses its idiomatic library — and declare fastmcp as an explicit dependency.
+gist: Use the fastmcp client (the fastmcp-slim[client] distribution) on the agent side and the official mcp SDK's FastMCP on the server side — each role uses its idiomatic library — and declare fastmcp-slim[client] as an explicit dependency.
 ---
 
 # ADR-0002: MCP client (fastmcp) vs server (official mcp SDK) libraries
@@ -26,9 +26,9 @@ This was not a recorded decision, and it carries a latent hygiene defect: `platf
 
 Keep both libraries, each on the side where it is idiomatic, **and** make the client-side dependency explicit:
 
-- **Client = `fastmcp`.** pydantic-ai's MCP toolset is built on `fastmcp`; using its client transport is the supported, lowest-friction integration. Fighting that to force a single library buys nothing for a template.
+- **Client = `fastmcp` (the `fastmcp-slim[client]` distribution).** pydantic-ai's MCP toolset is built on the `fastmcp` client; using its transport is the supported, lowest-friction integration. The `fastmcp` import namespace is provided by **`fastmcp-slim[client]`** (what `pydantic-ai-slim[mcp]` resolves), **not** the full `fastmcp` package — which would clash on the same namespace or drag the server tree into `platform-core`. Fighting that to force a single library buys nothing for a template.
 - **Server = official `mcp` SDK FastMCP.** The first-party SDK is the canonical way to author an MCP server, and it is what a cloner should copy when writing their own.
-- **Declare `fastmcp` as a direct dependency of `platform-core`** ("depend on what you import"). The implementation (a one-line `pyproject.toml` edit) is tracked as **D-3** in `docs/registers/deferred-hardening.md`; this ADR records the decision, the register tracks the edit.
+- **Declare `fastmcp-slim[client]` as a direct dependency of `platform-core`** ("depend on what you import" — it provides the `fastmcp` namespace the client imports). Tracked as **D-3** in `docs/registers/deferred-hardening.md`; **shipped in the `template-mcp-capability` overlay**.
 
 ## Consequences
 
@@ -41,7 +41,7 @@ Cons:
 
 - **Two MCP libraries resolve into one venv**, enlarging the dependency graph. Acceptable: both share the same protocol and the workspace resolves one coherent set (per ADR-0001).
 - **A future divergence** between `fastmcp` and the official SDK's protocol surface is a (low) risk the template would have to track.
-- **Until D-3 ships, the `fastmcp` import is transitive** — a backend swap in pydantic-ai would break it silently. Declaring it directly closes that.
+- **D-3 (shipped in `template-mcp-capability`) declares `fastmcp-slim[client]` directly**, so a backend swap in pydantic-ai can no longer silently break the `fastmcp` import.
 
 ## Alternatives considered
 
