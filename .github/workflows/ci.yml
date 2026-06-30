@@ -79,3 +79,23 @@ jobs:
     with:
       scan-args: |-
         --lockfile=uv.lock
+
+  # GitHub-Actions workflow linter (D-11). Catches the workflow-syntax/expression class that GitHub's
+  # own lexer rejects at startup — e.g. an empty `${{ }}` (even inside a run-block shell comment), which
+  # startup_failure'd this family's first public CI. fail_level:error makes a finding fail the job
+  # (the action defaults to none = annotate-only). Coverage boundary (verified): it does NOT catch a
+  # bad run-step CLI flag like `cyclonedx-py --outfile` — that is shell-runtime, outside actionlint +
+  # shellcheck; a CI smoke-run is the control for that class.
+  actionlint:
+    name: actionlint (workflow lint)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - uses: reviewdog/action-actionlint@be0761e4c1bab7cfdfca56cd03d4bb6253e39a4a # v1.72.0
+        with:
+          fail_level: error
