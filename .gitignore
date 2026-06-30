@@ -225,3 +225,7 @@ Thumbs.db
 *.local
 # local agent run artifacts / scratch
 .scratch/
+# Session handoffs — local-only, never shipped with the template. end-session's
+# SESSIONS_DIR probe honours a gitignored repo-relative session dir; the structure-lint
+# skips git-ignored paths so these frontmatter-less handoffs do not trip the docs gate.
+docs/sessions/

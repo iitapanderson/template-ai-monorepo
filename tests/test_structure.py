@@ -14,6 +14,7 @@ it satisfies; ``test_version_marker_matches_declaration`` ties it to the authori
 from __future__ import annotations
 
 import re
+import subprocess
 import tomllib
 from pathlib import Path
 from typing import cast
@@ -90,8 +91,34 @@ def _tracked_and_present(rel: str) -> bool:
     return (REPO_ROOT / rel).exists()
 
 
+def _drop_git_ignored(paths: list[Path]) -> list[Path]:
+    """Drop git-ignored paths so the lint enforces only tracked + untracked-NOT-ignored
+    files — repo-hygiene's stated enumeration. A deliberately git-ignored path (e.g. a
+    local-only ``docs/sessions/`` handoff dir) is the author's "keep this out of the repo"
+    choice, not the gate's business; an untracked-but-NOT-ignored stray is still caught.
+    No-op outside a git work tree (every path kept), so a non-git checkout still lints fully.
+    """
+    if not paths:
+        return paths
+    rels = {p: p.relative_to(REPO_ROOT).as_posix() for p in paths}
+    try:
+        # Trusted internal call: a literal `git check-ignore` (no shell, no user input);
+        # `git` is resolved via PATH by intent (portable across machines/CI).
+        proc = subprocess.run(  # noqa: S603
+            ["git", "-C", str(REPO_ROOT), "check-ignore", "--stdin", "-z"],  # noqa: S607
+            input="".join(f"{rel}\0" for rel in rels.values()),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except (FileNotFoundError, OSError):
+        return paths  # git absent / not a work tree → enforce on everything (fail-closed)
+    ignored = {entry for entry in proc.stdout.split("\0") if entry}
+    return [p for p, rel in rels.items() if rel not in ignored]
+
+
 def _iter_repo_files(suffix: str) -> list[Path]:
-    """All files with ``suffix`` under the repo, skipping only genuine noise."""
+    """All files with ``suffix`` under the repo, skipping genuine noise and git-ignored paths."""
     out: list[Path] = []
     for p in REPO_ROOT.rglob(f"*{suffix}"):
         parts = p.relative_to(REPO_ROOT).parts
@@ -100,7 +127,7 @@ def _iter_repo_files(suffix: str) -> list[Path]:
         if parts and parts[0] in _ROOT_ONLY_SKIP:
             continue
         out.append(p)
-    return out
+    return _drop_git_ignored(out)
 
 
 def _member_globs() -> list[str]:
@@ -317,7 +344,7 @@ def test_docs_knowledge_artefacts_have_enum_valid_frontmatter() -> None:
     if not docs.is_dir():
         pytest.skip("no docs/ yet")
     problems: list[str] = []
-    for md in docs.rglob("*.md"):
+    for md in _drop_git_ignored(list(docs.rglob("*.md"))):
         if md.name.upper() == "README.MD":
             continue
         fm = _read_frontmatter(md)
