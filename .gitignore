@@ -223,6 +223,10 @@ __marimo__/
 .DS_Store
 Thumbs.db
 *.local
+# Private per-clone agent notes — update-safe home for project-specific guidance (AGENTS.md
+# re-renders on copier update). The .md suffix escapes *.local, so pin it explicitly; the
+# structure-lint's _drop_git_ignored then skips it (never a tracked root .md).
+AGENTS.local.md
 # local agent run artifacts / scratch
 .scratch/
 # Session handoffs — local-only, never shipped with the template. end-session's

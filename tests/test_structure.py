@@ -81,6 +81,9 @@ _PY_ROOT_REQUIRED_FLOOR: frozenset[str] = frozenset(
 _PY_MEMBER_ROOTS_FLOOR: frozenset[str] = frozenset({"packages", "services"})
 
 # Markdown allowed at the repo ROOT (everything else markdown must live under docs/).
+# AGENTS.local.md is intentionally NOT here: it is git-ignored (private per-clone agent notes), so
+# _drop_git_ignored drops it before this check sees it — allow-listing it would be dead config
+# (mirrors the base tools/governance_checks.py rationale).
 ROOT_MD_ALLOWLIST: frozenset[str] = frozenset(
     {
         "README.md",

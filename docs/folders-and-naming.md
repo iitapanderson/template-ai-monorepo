@@ -19,24 +19,42 @@ disagree, the test wins; fix one to match the other in the same change.
 
 ## Root furniture
 
-The repository root contains exactly the following structural members:
+The authoritative, enforced set of required root entries is
+`[tool.structure_lint].root_required` in `pyproject.toml`, asserted by
+`tests/test_structure.py`. This narrative lists the same set (grouped for readability)
+plus the structural directories; when the two disagree, the test wins.
+
+**Workspace and build files**
 
 - `pyproject.toml` — the uv workspace root. Declares `[tool.uv.workspace]` with
-  `members = ["packages/*", "services/*"]` and the shared tool configuration
-  (`ruff`, `pyright` in strict mode, `pytest`). It is the workspace manifest, not a
-  distributable package.
+  `members = ["packages/*", "services/*"]`, the shared tool configuration (`ruff`,
+  `pyright` in strict mode, `pytest`), and `[tool.structure_lint]`. It is the workspace
+  manifest, not a distributable package.
 - `uv.lock` — the resolved, committed lockfile for the whole workspace. Regenerated
   by `uv sync --all-packages`; never hand-edited.
+- `.pre-commit-config.yaml` — local quality gate (ruff, pyright, pytest, structure-lint).
+- `.python-version`, `.gitignore`, `.editorconfig` — standard repo meta.
+
+**OSS furniture** (all required; all front-door / meta files, frontmatter-exempt)
+
+- `README.md` — the project front door. Rendered on GitHub; carries no frontmatter.
+- `LICENSE` — Apache-2.0, verbatim and unmodified.
+- `NOTICE` — attribution: `Phillip Anderson | Integrate-IT Australia`.
+- `CHANGELOG.md`, `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `SECURITY.md` — standard OSS meta.
+- `AGENTS.md`, `CLAUDE.md` — agent-instruction files.
+
+`AGENTS.local.md` — the update-safe home for project-specific agent notes (`AGENTS.md`
+itself re-renders on `copier update`) — is **git-ignored**, not furniture: you create it
+yourself, it is never committed, and Copier never touches it. Because it is git-ignored the
+structure-lint drops it before the root-markdown check, so it needs no allowlist entry.
+
+**Structural directories**
+
 - `packages/` — importable library members (see below).
 - `services/` — deployable runtime members (see below).
 - `tests/` — the workspace-level test tree (see below).
 - `docs/` — markdown knowledge artifacts (this file lives here).
 - `.github/workflows/` — GitHub Actions CI definitions.
-- `.pre-commit-config.yaml` — local quality gate (ruff, pyright, pytest, structure-lint).
-- `README.md` — the project front door. Rendered on GitHub; carries no frontmatter.
-- `LICENSE` — Apache-2.0, verbatim and unmodified.
-- `NOTICE` — attribution: `Phillip Anderson | Integrate-IT Australia`.
-- `.gitignore`, `.python-version` — standard repo meta.
 
 ## `packages/*` and `services/*` member layout
 
@@ -86,7 +104,8 @@ The workspace test tree at the root mirrors the standard layout:
 tests/
   unit/                   # fast, isolated, no external processes
   integration/            # marked with @pytest.mark.integration
-  fixtures/               # shared test data and pytest fixtures (conftest.py)
+  fixtures/               # shared static test data
+  conftest.py             # shared pytest fixtures, exposed to the whole tree
   test_structure.py       # the executable structure-lint gate
 ```
 
@@ -95,8 +114,8 @@ tests/
 - **`integration/`** holds tests that exercise the MCP stdio boundary or other live
   collaborators. Every such test carries the `@pytest.mark.integration` marker so it
   can be selected or excluded (`pytest -m "not integration"`).
-- **`fixtures/`** holds shared fixtures and static test data; `conftest.py` exposes
-  them to the tree.
+- **`fixtures/`** holds shared static test data; `conftest.py` (at the `tests/` root,
+  not under `fixtures/`) exposes the shared fixtures to the whole tree.
 - **`test_structure.py`** is the structure-lint gate itself and runs as part of the
   ordinary `pytest` invocation.
 
